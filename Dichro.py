@@ -4,10 +4,12 @@ import numpy as np
 
 # Filenames
 file_name = 'dichro.txt'  
+file_name_collect = '{0}_collect.{1}'.format(*file_name.rsplit('.', 1))
+file_name_ff = '{0}_ff.{1}'.format(*file_name.rsplit('.', 1))
 # NUM OF TOMOS
 #num_of_tomos = 1
   
-
+# TODO Why this naming convention? it does not follow manytomos naming 
 # Tomo parameters; 
 # naming convention date_sampleName_JJoffset_angle_number.xrm
 # FF naming convention date_sampleName_JJoffset_FF_number.xrm
@@ -57,89 +59,102 @@ FF2_T = 0
 repetitions = 10
 repetitions_FF = 10
 
-f = open(file_name, 'w')
+with open(file_name_collect, 'w') as f:
+    # Move to Energy: important for preprocessing
+    f.write('moveto energy %6.2f\n' %E)
 
-# Move to Energy: important for preprocessing
-f.write('moveto energy %6.2f\n' %E)
+    #### Confirm Sample Position ####
+    f.write('moveto X %6.2f\n' %X) 
+    f.write('moveto Y %6.2f\n' %Y)
+    f.write('moveto Z %6.2f\n' %Z)
 
-#### Confirm Sample Position ####
-f.write('moveto X %6.2f\n' %X) 
-f.write('moveto Y %6.2f\n' %Y)
-f.write('moveto Z %6.2f\n' %Z)
+    #### JU_1, JD_1 ###
 
-#### JU_1, JD_1 ###
+    f.write('setbinning ' + str(binning) + '\n')
 
-f.write('setbinning ' + str(binning) + '\n')
+    f.write('moveto T %6.2f\n' %Tini)
 
-f.write('moveto T %6.2f\n' %Tini)
+    for T in np.arange(T_0, T_1+T_step, T_step):
+        f.write('setexp ' + str(exptime1) + '\n')
+        f.write('moveto T %6.2f\n' %T)
+        f.write('moveto phy %6.2f\n' %JJU_1)
+        f.write('moveto phx %6.2f\n' %JJD_1)
+        f.write('wait 80\n')
+        for j in range(repetitions):
+            f.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_1, T, j))
+        f.write('moveto phy %6.2f\n' %JJU_2)
+        f.write('moveto phx %6.2f\n' %JJD_2)
+        f.write('wait 80\n')
+        for j in range(repetitions):
+            f.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_2, T, j)) 
+        T = T + T_step
 
-for T in np.arange(T_0, T_1+T_step, T_step):
-    f.write('setexp ' + str(exptime1) + '\n')
-    f.write('moveto T %6.2f\n' %T)
-    f.write('moveto phy %6.2f\n' %JJU_1)
-    f.write('moveto phx %6.2f\n' %JJD_1)
-    f.write('wait 80\n')
-    for j in range(repetitions):
-        f.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_1, T, j))
-    f.write('moveto phy %6.2f\n' %JJU_2)
-    f.write('moveto phx %6.2f\n' %JJD_2)
-    f.write('wait 80\n')
-    for j in range(repetitions):
-        f.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_2, T, j)) 
-    T = T + T_step
+    for T in np.arange(T_1+T_step, T_2+T_step, T_step):
+        f.write('setexp ' + str(exptime2) + '\n')
+        f.write('moveto T %6.2f\n' %T)
+        f.write('moveto phy %6.2f\n' %JJU_1)
+        f.write('moveto phx %6.2f\n' %JJD_1)
+        f.write('wait 80\n')
+        for j in range(repetitions):
+            f.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_1, T, j))
+        f.write('moveto phy %6.2f\n' %JJU_2)
+        f.write('moveto phx %6.2f\n' %JJD_2)
+        f.write('wait 80\n')
+        for j in range(repetitions):
+            f.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_2, T, j)) 
+        T = T + T_step
 
-for T in np.arange(T_1+T_step, T_2+T_step, T_step):
-    f.write('setexp ' + str(exptime2) + '\n')
-    f.write('moveto T %6.2f\n' %T)
-    f.write('moveto phy %6.2f\n' %JJU_1)
-    f.write('moveto phx %6.2f\n' %JJD_1)
-    f.write('wait 80\n')
-    for j in range(repetitions):
-        f.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_1, T, j))
-    f.write('moveto phy %6.2f\n' %JJU_2)
-    f.write('moveto phx %6.2f\n' %JJD_2)
-    f.write('wait 80\n')
-    for j in range(repetitions):
-        f.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_2, T, j)) 
-    T = T + T_step
+    for T in np.arange(T_2+T_step, T_3+T_step, T_step):
+        f.write('setexp ' + str(exptime3) + '\n')
+        f.write('moveto T %6.2f\n' %T)
+        f.write('moveto phy %6.2f\n' %JJU_1)
+        f.write('moveto phx %6.2f\n' %JJD_1)
+        f.write('wait 80\n')
+        for j in range(repetitions):
+            f.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_1, T, j))
+        f.write('moveto phy %6.2f\n' %JJU_2)
+        f.write('moveto phx %6.2f\n' %JJD_2)
+        f.write('wait 80\n')
+        for j in range(repetitions):
+            f.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_2, T, j)) 
+        T = T + T_step
 
-for T in np.arange(T_2+T_step, T_3+T_step, T_step):
-    f.write('setexp ' + str(exptime3) + '\n')
-    f.write('moveto T %6.2f\n' %T)
-    f.write('moveto phy %6.2f\n' %JJU_1)
-    f.write('moveto phx %6.2f\n' %JJD_1)
-    f.write('wait 80\n')
-    for j in range(repetitions):
-        f.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_1, T, j))
-    f.write('moveto phy %6.2f\n' %JJU_2)
-    f.write('moveto phx %6.2f\n' %JJD_2)
-    f.write('wait 80\n')
-    for j in range(repetitions):
-        f.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_2, T, j)) 
-    T = T + T_step
-
-f.write('moveto T %6.2f\n' %T0)
-   
+# Copy file_name_collect contents in file_name
+with open(file_name, 'w') as outfile:
+    with open(file_name_collect) as infile:
+        outfile.write(infile.read())
 
 # FF Acquisition
-f.write('moveto T %6.2f\n' %FF_T)
-f.write('moveto Z %6.2f\n' %FF_Z) 
-f.write('moveto X %6.2f\n' %FF_X)
-f.write('setexp ' + str(exptimeFF) + '\n')
-for j in range(repetitions_FF):
-    f.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_2, "FF", j))
+with open(file_name_ff, 'w') as ff_file:
+    # TODO is it need?
+    ff_file.write('moveto T %6.2f\n' %T0)
+    ff_file.write('moveto T %6.2f\n' %FF_T)
+    ff_file.write('moveto Z %6.2f\n' %FF_Z) 
+    ff_file.write('moveto X %6.2f\n' %FF_X)
+    ff_file.write('setexp ' + str(exptimeFF) + '\n')
+    for j in range(repetitions_FF):
+        ff_file.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_2, "FF", j))
 
-f.write('moveto phy %6.2f\n' %JJU_1)
-f.write('moveto phx %6.2f\n' %JJD_1)
-f.write('wait 80\n')
-for j in range(repetitions_FF):
-    f.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_1, "FF", j))
+    ff_file.write('moveto phy %6.2f\n' %JJU_1)
+    ff_file.write('moveto phx %6.2f\n' %JJD_1)
+    ff_file.write('wait 80\n')
+    for j in range(repetitions_FF):
+        ff_file.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_1, "FF", j))
 
-f.write('moveto X %6.2f\n' %FF2_X)
-f.write('moveto Z %6.2f\n' %FF2_Z)
-f.write('moveto T %6.2f\n' %FF2_T)
-f.write('moveto phy %6.2f\n' %JJU_3)
-f.write('moveto phx %6.2f\n' %JJD_3)
+# Copy file_name_collect contents in file_name
+with open(file_name, 'a') as outfile:
+    with open(file_name_ff) as infile:
+        outfile.write(infile.read())
 
-f.close()
-
+# TODO is it need?
+with open(file_name_collect, 'a') as collect_file, open(file_name, 'a') as outfile:
+    collect_file.write('moveto X %6.2f\n' %FF2_X)
+    outfile.write('moveto X %6.2f\n' %FF2_X)
+    collect_file.write('moveto Z %6.2f\n' %FF2_Z)
+    outfile.write('moveto Z %6.2f\n' %FF2_Z)
+    collect_file.write('moveto T %6.2f\n' %FF2_T)
+    outfile.write('moveto T %6.2f\n' %FF2_T)
+    collect_file.write('moveto phy %6.2f\n' %JJU_3)
+    outfile.write('moveto phy %6.2f\n' %JJU_3)
+    collect_file.write('moveto phx %6.2f\n' %JJD_3)
+    outfile.write('moveto phx %6.2f\n' %JJD_3)
