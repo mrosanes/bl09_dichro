@@ -59,6 +59,14 @@ FF2_T = 0
 repetitions = 10
 repetitions_FF = 10
 
+
+def set_target_and_select(file, target, select):
+    # Move target
+    file.write('moveto prx %6.2f\n' % target)
+    # Move select
+    file.write('moveto pxy %6.2f\n' % select)
+
+
 with open(file_name_collect, 'w') as f:
     # Move to Energy: important for preprocessing
     f.write('moveto energy %6.2f\n' %E)
@@ -72,6 +80,7 @@ with open(file_name_collect, 'w') as f:
 
     f.write('setbinning ' + str(binning) + '\n')
 
+    set_target_and_select(f, 0, 0)
     f.write('moveto T %6.2f\n' %Tini)
 
     for T in np.arange(T_0, T_1+T_step, T_step):
@@ -87,7 +96,7 @@ with open(file_name_collect, 'w') as f:
         f.write('wait 80\n')
         for j in range(repetitions):
             f.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_2, T, j)) 
-        T = T + T_step
+        set_target_and_select(f, 1, T)
 
     for T in np.arange(T_1+T_step, T_2+T_step, T_step):
         f.write('setexp ' + str(exptime2) + '\n')
@@ -102,7 +111,7 @@ with open(file_name_collect, 'w') as f:
         f.write('wait 80\n')
         for j in range(repetitions):
             f.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_2, T, j)) 
-        T = T + T_step
+        set_target_and_select(f, 1, T)
 
     for T in np.arange(T_2+T_step, T_3+T_step, T_step):
         f.write('setexp ' + str(exptime3) + '\n')
@@ -117,7 +126,7 @@ with open(file_name_collect, 'w') as f:
         f.write('wait 80\n')
         for j in range(repetitions):
             f.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_2, T, j)) 
-        T = T + T_step
+        set_target_and_select(f, 1, T)
 
 # Copy file_name_collect contents in file_name
 with open(file_name, 'w') as outfile:
