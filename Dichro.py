@@ -119,6 +119,20 @@ def angular_region_collection(file, repetitions, exptime, T_initial, T_final, T_
         collect_many_repetitions(file, T, counter, repetitions)
         counter += 1
 
+def collect_FF(file, extension="FF"):
+    file.write('moveto T %6.2f\n' % T0)
+    file.write('moveto T %6.2f\n' % FF_T)
+    file.write('moveto Z %6.2f\n' % FF_Z)
+    file.write('moveto X %6.2f\n' % FF_X)
+    file.write('setexp ' + str(exptimeFF) + '\n')
+    move_to_jj_1(file)
+    for j in range(repetitions_FF):
+        file.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_1, extension, j))
+
+    move_to_jj_2(file)
+    for j in range(repetitions_FF):
+        file.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_2, extension, j))
+
 ###############################################################################
 
 
@@ -155,17 +169,7 @@ with open(file_name, 'w') as outfile:
 
 # FF Acquisition
 with open(file_name_ff, 'w') as ff_file:
-    ff_file.write('moveto T %6.2f\n' % FF_T)
-    ff_file.write('moveto Z %6.2f\n' % FF_Z)
-    ff_file.write('moveto X %6.2f\n' % FF_X)
-    ff_file.write('setexp ' + str(exptimeFF) + '\n')
-    move_to_jj_1(ff_file)
-    for j in range(repetitions_FF):
-        ff_file.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_1, "FF", j))
-
-    move_to_jj_2(ff_file)
-    for j in range(repetitions_FF):
-        ff_file.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_2, "FF", j))
+    collect_FF(ff_file)
 
 # Copy file_name_collect contents in file_name
 with open(file_name, 'a') as outfile:
@@ -173,14 +177,16 @@ with open(file_name, 'a') as outfile:
         outfile.write(infile.read())
 
 with open(file_name_collect, 'a') as collect_file, open(file_name, 'a') as outfile:
+    collect_FF(collect_file, "FF_END")
+
     collect_file.write('moveto X %6.2f\n' % FF2_X)
     outfile.write('moveto X %6.2f\n' % FF2_X)
     collect_file.write('moveto Z %6.2f\n' % FF2_Z)
     outfile.write('moveto Z %6.2f\n' % FF2_Z)
     collect_file.write('moveto T %6.2f\n' % FF2_T)
     outfile.write('moveto T %6.2f\n' % FF2_T)
-    collect_file.write('moveto phy %6.2f\n' % JJU_3)
-    outfile.write('moveto phy %6.2f\n' % JJU_3)
-    collect_file.write('moveto phx %6.2f\n' % JJD_3)
-    outfile.write('moveto phx %6.2f\n' % JJD_3)
+    collect_file.write('moveto phy %6.2f\n' % JJD_3)
+    outfile.write('moveto phy %6.2f\n' % JJD_3)
+    collect_file.write('moveto phx %6.2f\n' % JJU_3)
+    outfile.write('moveto phx %6.2f\n' % JJU_3)
 ###############################################################################
