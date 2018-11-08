@@ -109,6 +109,7 @@ def collect_many_repetitions(file, T, counter, repetitions):
         move_to_jj_1(file)
         for j in range(repetitions):
             file.write('collect {0}_{1}_{2}_{3}_{4}.xrm\n'.format(date, sample_name_1, JJ_offset_1, T, j))
+    set_select_and_target(file, 1, T)
 
 # Function: Collection for a full angular region
 def angular_region_collection(file, repetitions, exptime, T_initial, T_final, T_step):
@@ -147,6 +148,7 @@ with open(file_name_collect, 'w') as collect_file:
     collect_file.write('moveto Z %6.2f\n' % Z)
     #### JU_1, JD_1 ###
     collect_file.write('setbinning ' + str(binning) + '\n')
+    set_select_and_target(collect_file, 0, 0)
     collect_file.write('moveto T %6.2f\n' % Tini)
     # You can define new regions below
     angular_region_collection(collect_file, 25, exptime1, T_0, T_1 + T_step1, T_step1)
